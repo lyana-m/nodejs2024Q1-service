@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ArtistDto } from './dto/artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { TrackService } from 'src/track/track.service';
+import { AlbumService } from 'src/album/album.service';
 
 @Injectable()
 export class ArtistService {
@@ -13,7 +14,10 @@ export class ArtistService {
     },
   ];
 
-  constructor(private readonly trackService: TrackService) {}
+  constructor(
+    private readonly trackService: TrackService,
+    private readonly albumService: AlbumService,
+  ) {}
 
   getAllArtists(): ArtistDto[] {
     return this.artists;
@@ -60,5 +64,6 @@ export class ArtistService {
     this.artists = this.artists.filter((artist) => artist.id !== id);
 
     this.trackService.deleteArtist(id);
+    this.albumService.deleteArtist(id);
   }
 }

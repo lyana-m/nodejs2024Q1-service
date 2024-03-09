@@ -67,4 +67,13 @@ export class TrackService {
       return track;
     });
   }
+
+  deleteAlbum(albumId: string) {
+    this.tracks = this.tracks.map((track) => {
+      if (track.albumId === albumId) {
+        return { ...track, albumId: null };
+      }
+      return track;
+    });
+  }
 }
