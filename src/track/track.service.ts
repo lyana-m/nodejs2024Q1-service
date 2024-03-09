@@ -13,6 +13,7 @@ export class TrackService {
       duration: 182,
     },
   ];
+  private favTracks: TrackDto[] = [];
 
   getAllTracks(): TrackDto[] {
     return this.tracks;
@@ -57,6 +58,7 @@ export class TrackService {
     this.getTrackById(id);
 
     this.tracks = this.tracks.filter((track) => track.id !== id);
+    this.deleteTrackFromFavs(id);
   }
 
   deleteArtist(artistId: string) {
@@ -75,5 +77,23 @@ export class TrackService {
       }
       return track;
     });
+  }
+
+  getFavTracks() {
+    return this.favTracks;
+  }
+
+  addTrackToFavs(track: TrackDto) {
+    this.favTracks.push(track);
+  }
+
+  isFavTrack(trackId: string) {
+    const track = this.favTracks.find((track) => track.id === trackId);
+
+    return Boolean(track);
+  }
+
+  deleteTrackFromFavs(trackId: string) {
+    this.favTracks = this.favTracks.filter((track) => track.id !== trackId);
   }
 }

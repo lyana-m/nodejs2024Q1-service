@@ -13,6 +13,7 @@ export class ArtistService {
       grammy: false,
     },
   ];
+  private favArtists: ArtistDto[] = [];
 
   constructor(
     private readonly trackService: TrackService,
@@ -65,5 +66,26 @@ export class ArtistService {
 
     this.trackService.deleteArtist(id);
     this.albumService.deleteArtist(id);
+    this.deleteArtistFromFavs(id);
+  }
+
+  getFavArtists() {
+    return this.favArtists;
+  }
+
+  addArtistToFavs(artist: ArtistDto) {
+    this.favArtists.push(artist);
+  }
+
+  isFavArtist(artistId: string) {
+    const artist = this.favArtists.find((artist) => artist.id === artistId);
+
+    return Boolean(artist);
+  }
+
+  deleteArtistFromFavs(artistId: string) {
+    this.favArtists = this.favArtists.filter(
+      (artist) => artist.id !== artistId,
+    );
   }
 }
