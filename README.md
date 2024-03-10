@@ -17,6 +17,13 @@ git clone {repository URL}
 npm install
 ```
 
+## Environment variables
+Create local `.env` file based on `.env.example`. You can change app port (4000 as default).
+
+```
+cp .env.example .env
+```
+
 ## Running application
 
 ```
@@ -29,7 +36,7 @@ For more information about OpenAPI/Swagger please visit https://swagger.io/.
 
 ## Testing
 
-After application running open new terminal and enter:
+**After application running** open new terminal and enter:
 
 To run all tests without authorization
 
@@ -54,6 +61,8 @@ To run only specific test suite with authorization
 ```
 npm run test:auth -- <path to suite>
 ```
+
+**Note:** Test `Users (e2e) › PUT › should correctly update user password match` test may fail randomly (if it takes less than 1 ms to complete). This does not indicate a problem with the application, just try again.
 
 ### Auto-fix and format
 
