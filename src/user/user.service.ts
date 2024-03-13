@@ -1,26 +1,31 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { v4 as uuidv4 } from 'uuid';
 import { UserDto } from './dto/user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { PrismaService } from '../prisma.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class UserService {
-  private users: UserDto[] = [
-    {
-      id: '550e8400-e29b-41d4-a716-446655440000',
-      login: 'vanya',
-      password: '123',
-      version: 1,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    },
-  ];
+  constructor(private prisma: PrismaService) {}
 
-  getAllUsers(): UserDto[] {
-    return this.users;
+  convertUserToUserDto(user: User): UserDto {
+    return {
+      ...user,
+      createdAt: new Date(user.createdAt).getTime(),
+      updatedAt: new Date(user.updatedAt).getTime(),
+    };
   }
 
-  getUserById(id: string): UserDto {
-    const user = this.users.find((user) => user.id === id);
+  async getAllUsers(): Promise<UserDto[]> {
+    const users = await this.prisma.user.findMany();
+
+    return users.map((user) => this.convertUserToUserDto(user));
+  }
+
+  async findUserById(id: string) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
 
     if (!user) {
       throw new HttpException(
@@ -32,14 +37,31 @@ export class UserService {
     return user;
   }
 
-  createUser(user: UserDto) {
-    this.users.push(user);
+  async getUserById(id: string): Promise<UserDto> {
+    const user = await this.findUserById(id);
 
-    return user;
+    return this.convertUserToUserDto(user);
   }
 
-  updatePassword(id: string, updatePasswordDto: UpdatePasswordDto) {
-    const user = this.getUserById(id);
+  async createUser(createUserDto: CreateUserDto): Promise<UserDto> {
+    const timestamp = new Date();
+    const user = {
+      id: uuidv4(),
+      version: 1,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      ...createUserDto,
+    };
+    const createdUser = await this.prisma.user.create({ data: { ...user } });
+
+    return this.convertUserToUserDto(createdUser);
+  }
+
+  async updatePassword(
+    id: string,
+    updatePasswordDto: UpdatePasswordDto,
+  ): Promise<UserDto> {
+    const user = await this.findUserById(id);
 
     if (user.password !== updatePasswordDto.oldPassword) {
       throw new HttpException(`Invalid old password`, HttpStatus.FORBIDDEN);
@@ -52,24 +74,29 @@ export class UserService {
       );
     }
 
-    this.users = this.users.map((user) => {
-      if (user.id === id) {
-        return {
-          ...user,
-          version: ++user.version,
-          password: updatePasswordDto.newPassword,
-          updatedAt: Date.now(),
-        };
-      }
-      return user;
+    const updatedUser = await this.prisma.user.update({
+      where: { id },
+      data: {
+        ...user,
+        version: ++user.version,
+        password: updatePasswordDto.newPassword,
+        updatedAt: new Date(),
+      },
     });
 
-    return this.getUserById(id);
+    return this.convertUserToUserDto(updatedUser);
   }
 
-  deleteUser(id: string) {
-    this.getUserById(id);
+  async deleteUser(id: string) {
+    await this.findUserById(id);
 
-    this.users = this.users.filter((user) => user.id !== id);
+    const deletedUser = await this.prisma.user.delete({ where: { id } });
+
+    if (!deletedUser) {
+      throw new HttpException(
+        `User with id ${id} not found`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
   }
 }

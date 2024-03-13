@@ -12,7 +12,6 @@ import {
   HttpStatus,
   UseInterceptors,
 } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
 import { UserService } from './user.service';
 import { UserDto } from './dto/user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -40,15 +39,7 @@ export class UserController {
   async createUser(
     @Body(ValidationPipe) createUserDto: CreateUserDto,
   ): Promise<UserDto> {
-    const user = {
-      id: uuidv4(),
-      version: 1,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-      ...createUserDto,
-    };
-
-    return this.userService.createUser(user);
+    return this.userService.createUser(createUserDto);
   }
 
   @Put(':id')
