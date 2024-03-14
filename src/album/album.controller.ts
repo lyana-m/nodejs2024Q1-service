@@ -11,7 +11,6 @@ import {
   Put,
   ValidationPipe,
 } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
 import { AlbumService } from './album.service';
 import { AlbumDto } from './dto/album.dto';
 import { CreateAlbumDto } from './dto/create-album.dto';
@@ -37,12 +36,7 @@ export class AlbumController {
   async createAlbum(
     @Body(ValidationPipe) createAlbumDto: CreateAlbumDto,
   ): Promise<AlbumDto> {
-    const album = {
-      id: uuidv4(),
-      ...createAlbumDto,
-    };
-
-    return this.albumService.createAlbum(album);
+    return this.albumService.createAlbum(createAlbumDto);
   }
 
   @Put(':id')

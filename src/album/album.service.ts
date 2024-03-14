@@ -1,7 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { v4 as uuidv4 } from 'uuid';
 import { AlbumDto } from './dto/album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-import { TrackService } from 'src/track/track.service';
+import { PrismaService } from 'src/prisma.service';
+import { CreateAlbumDto } from './dto/create-album.dto';
 
 @Injectable()
 export class AlbumService {
@@ -15,14 +17,14 @@ export class AlbumService {
   ];
   private favAlbums: AlbumDto[] = [];
 
-  constructor(private readonly trackService: TrackService) {}
+  constructor(private prisma: PrismaService) {}
 
-  getAllAlbums(): AlbumDto[] {
-    return this.albums;
+  async getAllAlbums(): Promise<AlbumDto[]> {
+    return await this.prisma.album.findMany();
   }
 
-  getAlbumById(id: string): AlbumDto {
-    const album = this.albums.find((album) => album.id === id);
+  async getAlbumById(id: string): Promise<AlbumDto> {
+    const album = await this.prisma.album.findUnique({ where: { id } });
 
     if (!album) {
       throw new HttpException(
@@ -34,35 +36,43 @@ export class AlbumService {
     return album;
   }
 
-  createAlbum(album: AlbumDto) {
-    this.albums.push(album);
+  async createAlbum(createAlbumDto: CreateAlbumDto): Promise<AlbumDto> {
+    const album = {
+      id: uuidv4(),
+      ...createAlbumDto,
+    };
 
-    return album;
+    const createdAlbum = await this.prisma.album.create({ data: { ...album } });
+
+    return createdAlbum;
   }
 
-  updateAlbum(id: string, updateAlbumDto: UpdateAlbumDto) {
-    this.getAlbumById(id);
+  async updateAlbum(
+    id: string,
+    updateAlbumDto: UpdateAlbumDto,
+  ): Promise<AlbumDto> {
+    const album = await this.getAlbumById(id);
 
-    this.albums = this.albums.map((album) => {
-      if (album.id === id) {
-        return {
-          ...album,
-          ...updateAlbumDto,
-        };
-      }
-      return album;
+    const updatedAlbum = await this.prisma.album.update({
+      where: { id },
+      data: { ...album, ...updateAlbumDto },
     });
 
-    return this.getAlbumById(id);
+    return updatedAlbum;
   }
 
-  deleteAlbum(id: string) {
-    this.getAlbumById(id);
+  async deleteAlbum(id: string) {
+    await this.getAlbumById(id);
 
-    this.albums = this.albums.filter((album) => album.id !== id);
+    await this.prisma.track.updateMany({
+      where: { albumId: id },
+      data: { albumId: null },
+    });
 
-    this.trackService.deleteAlbum(id);
-    this.deleteAlbumFromFavs(id);
+    await this.prisma.album.delete({ where: { id } });
+
+    // this.trackService.deleteAlbum(id);
+    // this.deleteAlbumFromFavs(id);
   }
 
   deleteArtist(artistId: string) {

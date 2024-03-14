@@ -1,6 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { v4 as uuidv4 } from 'uuid';
 import { TrackDto } from './dto/track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
+import { PrismaService } from 'src/prisma.service';
+import { CreateTrackDto } from './dto/create-track.dto';
 
 @Injectable()
 export class TrackService {
@@ -15,12 +18,14 @@ export class TrackService {
   ];
   private favTracks: TrackDto[] = [];
 
-  getAllTracks(): TrackDto[] {
-    return this.tracks;
+  constructor(private prisma: PrismaService) {}
+
+  async getAllTracks(): Promise<TrackDto[]> {
+    return await this.prisma.track.findMany();
   }
 
-  getTrackById(id: string): TrackDto {
-    const track = this.tracks.find((track) => track.id === id);
+  async getTrackById(id: string): Promise<TrackDto> {
+    const track = await this.prisma.track.findUnique({ where: { id } });
 
     if (!track) {
       throw new HttpException(
@@ -32,33 +37,37 @@ export class TrackService {
     return track;
   }
 
-  createTrack(track: TrackDto) {
-    this.tracks.push(track);
-
-    return track;
-  }
-
-  updateTrack(id: string, updateTrackDto: UpdateTrackDto) {
-    this.getTrackById(id);
-
-    this.tracks = this.tracks.map((track) => {
-      if (track.id === id) {
-        return {
-          ...track,
-          ...updateTrackDto,
-        };
-      }
-      return track;
+  async createTrack(createTrackDto: CreateTrackDto): Promise<TrackDto> {
+    const createdTrack = await this.prisma.track.create({
+      data: {
+        id: uuidv4(),
+        ...createTrackDto,
+      },
     });
 
-    return this.getTrackById(id);
+    return createdTrack;
   }
 
-  deleteTrack(id: string) {
-    this.getTrackById(id);
+  async updateTrack(
+    id: string,
+    updateTrackDto: UpdateTrackDto,
+  ): Promise<TrackDto> {
+    const track = await this.getTrackById(id);
 
-    this.tracks = this.tracks.filter((track) => track.id !== id);
-    this.deleteTrackFromFavs(id);
+    const updatedTrack = await this.prisma.track.update({
+      where: { id },
+      data: { ...track, ...updateTrackDto },
+    });
+
+    return updatedTrack;
+  }
+
+  async deleteTrack(id: string) {
+    await this.getTrackById(id);
+
+    await this.prisma.track.delete({ where: { id } });
+
+    // this.deleteTrackFromFavs(id);
   }
 
   deleteArtist(artistId: string) {

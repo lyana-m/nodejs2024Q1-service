@@ -10,42 +10,73 @@ datasource db {
 model Album {
   id        String  @id @db.Uuid
   name      String  @db.VarChar(255)
-  artist_id String? @db.Uuid
+  artistId String?  @db.Uuid  @map("artist_id")
   year      Int
-  favorite  Boolean @default(false)
-  artist    Artist? @relation(fields: [artist_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "album_artist_id_fk")
-  track     Track[]
+
+  artist   Artist?    @relation(fields: [artistId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "album_artist_id_fk")
+  track    Track[]
+  favAlbum FavAlbum[]
+
   @@map("album")
 }
 
 model Artist {
-  id       String  @id @db.Uuid
-  name     String  @db.VarChar(255)
-  grammy   Boolean @default(false)
-  favorite Boolean @default(false)
-  album    Album[]
-  track    Track[]
+  id     String  @id @db.Uuid
+  name   String  @db.VarChar(255)
+  grammy Boolean @default(false)
+
+  album     Album[]
+  track     Track[]
+  favArtist FavArtist[]
+
   @@map("artist")
 }
 
 model Track {
   id        String  @id @db.Uuid
   name      String  @db.VarChar(255)
-  artist_id String? @db.Uuid
-  album_id  String? @db.Uuid
+  artistId String?  @db.Uuid         @map("artist_id")
+  albumId  String? @db.Uuid         @map("album_id")
   duration  Int
-  favorite  Boolean @default(false)
-  album     Album?  @relation(fields: [album_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "track_album_id_fk")
-  artist    Artist? @relation(fields: [artist_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "track_artist_id_fk")
+
+  album    Album?     @relation(fields: [albumId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "track_album_id_fk")
+  artist   Artist?    @relation(fields: [artistId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "track_artist_id_fk")
+  favTrack FavTrack[]
+
   @@map("track")
 }
 
 model User {
-  id         String   @id @db.Uuid
-  login      String   @db.VarChar(255)
-  password   String   @db.VarChar(255)
-  version    Int
-  createdAt  DateTime @map("created_at")
-  updatedAt  DateTime @map("updated_at")
-   @@map("user")
+  id        String   @id @db.Uuid
+  login     String   @db.VarChar(255)
+  password  String   @db.VarChar(255)
+  version   Int
+  createdAt DateTime @map("created_at")
+  updatedAt DateTime @map("updated_at")
+
+  @@map("user")
+}
+
+model FavAlbum {
+  albumId String @id @map("album_id") @db.Uuid
+
+  album Album? @relation(fields: [albumId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fav_album_album_id_fk")
+
+  @@map("fav_album")
+}
+
+model FavArtist {
+  artistId String @id @map("artist_id") @db.Uuid
+
+  artist Artist? @relation(fields: [artistId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fav_artist_artist_id_fk")
+
+  @@map("fav_artist")
+}
+
+model FavTrack {
+  trackId String @id @map("track_id") @db.Uuid
+
+  track Track? @relation(fields: [trackId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fav_track_track_id_fk")
+
+  @@map("fav_track")
 }
