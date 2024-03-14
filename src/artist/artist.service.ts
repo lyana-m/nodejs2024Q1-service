@@ -7,8 +7,6 @@ import { CreateArtistDto } from './dto/create-artist.dto';
 
 @Injectable()
 export class ArtistService {
-  private favArtists: ArtistDto[] = [];
-
   constructor(private prisma: PrismaService) {}
 
   async getAllArtists(): Promise<ArtistDto[]> {
@@ -64,28 +62,8 @@ export class ArtistService {
       data: { artistId: null },
     });
 
+    await this.prisma.favArtist.deleteMany({ where: { artistId: id } });
+
     await this.prisma.artist.delete({ where: { id } });
-
-    // this.deleteArtistFromFavs(id);
-  }
-
-  getFavArtists() {
-    return this.favArtists;
-  }
-
-  addArtistToFavs(artist: ArtistDto) {
-    this.favArtists.push(artist);
-  }
-
-  isFavArtist(artistId: string) {
-    const artist = this.favArtists.find((artist) => artist.id === artistId);
-
-    return Boolean(artist);
-  }
-
-  deleteArtistFromFavs(artistId: string) {
-    this.favArtists = this.favArtists.filter(
-      (artist) => artist.id !== artistId,
-    );
   }
 }

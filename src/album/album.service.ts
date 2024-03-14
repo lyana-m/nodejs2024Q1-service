@@ -7,16 +7,6 @@ import { CreateAlbumDto } from './dto/create-album.dto';
 
 @Injectable()
 export class AlbumService {
-  private albums: AlbumDto[] = [
-    {
-      id: '550e8400-e29b-41d4-a716-446655440004',
-      name: 'The Album',
-      artistId: null,
-      year: 2017,
-    },
-  ];
-  private favAlbums: AlbumDto[] = [];
-
   constructor(private prisma: PrismaService) {}
 
   async getAllAlbums(): Promise<AlbumDto[]> {
@@ -69,36 +59,10 @@ export class AlbumService {
       data: { albumId: null },
     });
 
-    await this.prisma.album.delete({ where: { id } });
-
-    // this.trackService.deleteAlbum(id);
-    // this.deleteAlbumFromFavs(id);
-  }
-
-  deleteArtist(artistId: string) {
-    this.albums = this.albums.map((album) => {
-      if (album.artistId === artistId) {
-        return { ...album, artistId: null };
-      }
-      return album;
+    await this.prisma.favAlbum.deleteMany({
+      where: { albumId: id },
     });
-  }
 
-  getFavAlbums() {
-    return this.favAlbums;
-  }
-
-  addAlbumToFavs(album: AlbumDto) {
-    this.favAlbums.push(album);
-  }
-
-  isFavAlbum(albumId: string) {
-    const album = this.favAlbums.find((album) => album.id === albumId);
-
-    return Boolean(album);
-  }
-
-  deleteAlbumFromFavs(albumId: string) {
-    this.favAlbums = this.favAlbums.filter((album) => album.id !== albumId);
+    await this.prisma.album.delete({ where: { id } });
   }
 }

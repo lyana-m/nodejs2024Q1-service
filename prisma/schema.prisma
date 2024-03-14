@@ -36,7 +36,7 @@ model Track {
   id        String  @id @db.Uuid
   name      String  @db.VarChar(255)
   artistId String?  @db.Uuid         @map("artist_id")
-  albumId  String? @db.Uuid         @map("album_id")
+  albumId  String? @db.Uuid          @map("album_id")
   duration  Int
 
   album    Album?     @relation(fields: [albumId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "track_album_id_fk")
