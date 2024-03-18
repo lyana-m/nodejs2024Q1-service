@@ -5,7 +5,7 @@ services:
     container_name: node
     build:
       context: .
-      dockerfile: ./.docker/Dockerfile.node
+      dockerfile: Dockerfile.node
     env_file:
       - .env
     volumes:
@@ -21,7 +21,7 @@ services:
     container_name: postgres
     build:
       context: .
-      dockerfile: ./.docker/Dockerfile.postgres
+      dockerfile: Dockerfile.postgres
     environment:
       - POSTGRES_PASSWORD=postgres
     env_file:
