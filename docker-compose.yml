@@ -16,6 +16,8 @@ services:
     depends_on:
       - postgres
     restart: always
+    networks:
+      - db_app_bridge
 
   postgres:
     container_name: postgres
@@ -31,7 +33,14 @@ services:
       - db-logs:/var/log/postgresql
     ports:
       - '5433:5432'
+    restart: always
+    networks:
+      - db_app_bridge
 
 volumes:
   db-data:
   db-logs:
+
+networks:
+ db_app_bridge:
+    driver: bridge
