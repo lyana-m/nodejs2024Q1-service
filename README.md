@@ -18,12 +18,18 @@ git clone https://github.com/lyana-m/nodejs2024Q1-service.git
 git checkout database-and-docker
 ```
 
-3. Create local `.env` file based on `.env.example`.
+3. Install NPM packages
+
+```
+npm install
+```
+
+4. Create local `.env` file based on `.env.example`.
 ```
 cp .env.example .env
 ```
 
-4. Run application and database in Docker (Docker Desktop app should be strated before)
+5. Run application and database in Docker (Docker Desktop app should be strated before)
 ```
 docker-compose up --build
 ```
