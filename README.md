@@ -1,12 +1,12 @@
-## Home Library Service
+### Home Library Service
 
-### Prerequisites
+#### Prerequisites
 
 - Git - [Download & Install Git](https://git-scm.com/downloads).
 - Node.js - [Download & Install Node.js](https://nodejs.org/en/download/) and the npm package manager.
 - Docker Desktop - [Download & Install Docker Desktop](https://www.docker.com/products/docker-desktop/).
 
-###  Running application in Docker
+####  Running application in Docker
 1. Clone repository
 
 ```
@@ -33,7 +33,16 @@ cp .env.example .env
 ```
 docker-compose up --build
 ```
-###  Running application locally
+#### Scan for vulnerabilities
+You can scan built application and database images for vulnerabilities
+```
+npm run docker:scan:app
+```
+```
+npm run docker:scan:db
+```
+
+####  Running application locally
 1. Clone repository
 
 ```
@@ -63,12 +72,12 @@ cp .env.example .env
 npm start
 ```
 
-### API documentation
+#### API documentation
 
 After starting the app on port (4000 as default) you can open
 in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
 
-### Testing
+#### Testing
 
 **After application running** open new terminal and enter:
 
@@ -98,7 +107,7 @@ npm run test:auth -- <path to suite>
 
 **Note:** Test `Users (e2e) › PUT › should correctly update user password match` test may fail randomly (if it takes less than 1 ms to complete). This does not indicate a problem with the application, just try again.
 
-### Auto-fix and format
+#### Auto-fix and format
 
 ```
 npm run lint
