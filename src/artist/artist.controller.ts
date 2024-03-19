@@ -11,7 +11,6 @@ import {
   Put,
   ValidationPipe,
 } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
 import { ArtistService } from './artist.service';
 import { ArtistDto } from './dto/artist.dto';
 import { CreateArtistDto } from './dto/create-artist.dto';
@@ -37,12 +36,7 @@ export class ArtistController {
   async createArtist(
     @Body(ValidationPipe) createArtistDto: CreateArtistDto,
   ): Promise<ArtistDto> {
-    const artist = {
-      id: uuidv4(),
-      ...createArtistDto,
-    };
-
-    return this.artistService.createArtist(artist);
+    return this.artistService.createArtist(createArtistDto);
   }
 
   @Put(':id')

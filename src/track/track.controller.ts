@@ -11,7 +11,6 @@ import {
   Put,
   ValidationPipe,
 } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
 import { TrackService } from './track.service';
 import { TrackDto } from './dto/track.dto';
 import { CreateTrackDto } from './dto/create-track.dto';
@@ -37,12 +36,7 @@ export class TrackController {
   async createTrack(
     @Body(ValidationPipe) createTrackDto: CreateTrackDto,
   ): Promise<TrackDto> {
-    const track = {
-      id: uuidv4(),
-      ...createTrackDto,
-    };
-
-    return this.trackService.createTrack(track);
+    return this.trackService.createTrack(createTrackDto);
   }
 
   @Put(':id')

@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  node:
+    container_name: node
+    build:
+      context: .
+      dockerfile: Dockerfile.node
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - 4000:4000
+    depends_on:
+      - postgres
+    restart: always
+    networks:
+      - db_app_bridge
+
+  postgres:
+    container_name: postgres
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    env_file:
+      - .env
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - db-logs:/var/log/postgresql
+    ports:
+      - '5433:5432'
+    restart: always
+    networks:
+      - db_app_bridge
+
+volumes:
+  db-data:
+  db-logs:
+
+networks:
+ db_app_bridge:
+    driver: bridge

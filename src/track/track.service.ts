@@ -1,26 +1,20 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { v4 as uuidv4 } from 'uuid';
 import { TrackDto } from './dto/track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
+import { PrismaService } from 'src/prisma.service';
+import { CreateTrackDto } from './dto/create-track.dto';
 
 @Injectable()
 export class TrackService {
-  private tracks: TrackDto[] = [
-    {
-      id: '550e8400-e29b-41d4-a716-446655440001',
-      name: 'This december',
-      artistId: null,
-      albumId: null,
-      duration: 182,
-    },
-  ];
-  private favTracks: TrackDto[] = [];
+  constructor(private prisma: PrismaService) {}
 
-  getAllTracks(): TrackDto[] {
-    return this.tracks;
+  async getAllTracks(): Promise<TrackDto[]> {
+    return await this.prisma.track.findMany();
   }
 
-  getTrackById(id: string): TrackDto {
-    const track = this.tracks.find((track) => track.id === id);
+  async getTrackById(id: string): Promise<TrackDto> {
+    const track = await this.prisma.track.findUnique({ where: { id } });
 
     if (!track) {
       throw new HttpException(
@@ -32,68 +26,36 @@ export class TrackService {
     return track;
   }
 
-  createTrack(track: TrackDto) {
-    this.tracks.push(track);
-
-    return track;
-  }
-
-  updateTrack(id: string, updateTrackDto: UpdateTrackDto) {
-    this.getTrackById(id);
-
-    this.tracks = this.tracks.map((track) => {
-      if (track.id === id) {
-        return {
-          ...track,
-          ...updateTrackDto,
-        };
-      }
-      return track;
+  async createTrack(createTrackDto: CreateTrackDto): Promise<TrackDto> {
+    const createdTrack = await this.prisma.track.create({
+      data: {
+        id: uuidv4(),
+        ...createTrackDto,
+      },
     });
 
-    return this.getTrackById(id);
+    return createdTrack;
   }
 
-  deleteTrack(id: string) {
-    this.getTrackById(id);
+  async updateTrack(
+    id: string,
+    updateTrackDto: UpdateTrackDto,
+  ): Promise<TrackDto> {
+    const track = await this.getTrackById(id);
 
-    this.tracks = this.tracks.filter((track) => track.id !== id);
-    this.deleteTrackFromFavs(id);
-  }
-
-  deleteArtist(artistId: string) {
-    this.tracks = this.tracks.map((track) => {
-      if (track.artistId === artistId) {
-        return { ...track, artistId: null };
-      }
-      return track;
+    const updatedTrack = await this.prisma.track.update({
+      where: { id },
+      data: { ...track, ...updateTrackDto },
     });
+
+    return updatedTrack;
   }
 
-  deleteAlbum(albumId: string) {
-    this.tracks = this.tracks.map((track) => {
-      if (track.albumId === albumId) {
-        return { ...track, albumId: null };
-      }
-      return track;
-    });
-  }
+  async deleteTrack(id: string) {
+    await this.getTrackById(id);
 
-  getFavTracks() {
-    return this.favTracks;
-  }
+    await this.prisma.favTrack.deleteMany({ where: { trackId: id } });
 
-  addTrackToFavs(track: TrackDto) {
-    this.favTracks.push(track);
-  }
-
-  isFavTrack(trackId: string) {
-    const track = this.favTracks.find((track) => track.id === trackId);
-
-    return Boolean(track);
-  }
-
-  deleteTrackFromFavs(trackId: string) {
-    this.favTracks = this.favTracks.filter((track) => track.id !== trackId);
+    await this.prisma.track.delete({ where: { id } });
   }
 }
