@@ -42,6 +42,9 @@ npm run docker:scan:app
 npm run docker:scan:db
 ```
 
+#### Image in DockerHub
+[nodejs2024q1-service-node](https://hub.docker.com/r/lyana/nodejs2024q1-service-node)
+
 ####  Running application locally
 1. Clone repository
 
