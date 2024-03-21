@@ -43,6 +43,16 @@ export class UserService {
     return this.convertUserToUserDto(user);
   }
 
+  async getUserByLogin(login: string): Promise<UserDto> {
+    const user = await this.prisma.user.findFirst({
+      where: { login },
+    });
+
+    if (user) {
+      return this.convertUserToUserDto(user);
+    }
+  }
+
   async createUser(createUserDto: CreateUserDto): Promise<UserDto> {
     const timestamp = new Date();
     const user = {
